@@ -2,48 +2,72 @@ import { Request, Response } from "express";
 import Web3Helper from "../utils/web3Helper";
 import Web3 from "web3";
 import axiosService from "../services/axios.service";
+import config from "../../config";
+import catchAsync from "../utils/catchAsync";
+import ApiError from "../utils/ApiError";
+import httpStatus from "http-status";
 
-const networks = [
-  {
-    network: "bscscan",
-    decimals: 18,
-    url: "https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=0xA719b8aB7EA7AF0DDb4358719a34631bb79d15Dc&apikey=28I5ITFX1EYAC8XZGHXZTFRZAUP5K7II8P",
-  },
-  {
-    network: "etherscan",
-    decimals: 6,
-    url: "https://api.etherscan.io/api?module=stats&action=tokensupply&contractaddress=0xE5CAeF4Af8780E59Df925470b050Fb23C43CA68C&apikey=XH8PK4M2TB7EKYMNZ4XN5C1N262MYY9E97",
-  },
-  {
-    network: "polygonscan",
-    decimals: 18,
-    url: "https://api.polygonscan.com/api?module=stats&action=tokensupply&contractaddress=0xd99baFe5031cC8B345cb2e8c80135991F12D7130&apikey=4FZ2GIH1Z4UG5HBIXNJ6VR4NA5XZP6F9FE",
-  },
-  {
-    network: "snowtrace",
-    decimals: 18,
-    url: "https://api.snowtrace.io/api?module=stats&action=tokensupply&contractaddress=0xE5CAeF4Af8780E59Df925470b050Fb23C43CA68C&apikey=H3KUTU2UYFXSZY3UEAUFHDEAABVRQTDD7V",
-  },
-];
+const getTokenSupply = catchAsync(
+  async (req: Request, res: Response): Promise<any> => {
+    let requests = [];
+    let contractsInfo = config.CONTRACTS_INFO;
+    if (contractsInfo.length > 0) {
+      for (let i = 0; i < contractsInfo.length; i++) {
+        if (contractsInfo[i].tokenName === req.params.tokenName) {
+          requests.push(axiosService.supplyRequest(contractsInfo[i]));
+        }
+      }
 
-const getTokenSupply = async (req: Request, res: Response): Promise<any> => {
-  let requests = [];
-  for (let i = 0; i < networks.length; i++)
-    requests.push(
-      axiosService.supplyRequest(networks[i].url, networks[i].decimals)
+      if (requests.length > 0) {
+        let tokensSupplies = await Promise.all(requests);
+
+        let tokensSuppliesInBN = tokensSupplies.map((supplyObject) => {
+          let supplyInBN = Web3Helper.toBN(
+            supplyObject.supply,
+            supplyObject.token.decimals
+          );
+          supplyObject.supplyInBN = supplyInBN;
+          return supplyObject;
+        });
+
+        let totalSupply = Web3Helper.countTotalSupply(tokensSuppliesInBN);
+
+        return res.send({
+          totalSupply,
+          totalSupplyByNetworks: createSupplyByNetworksResponse(
+            tokensSuppliesInBN,
+            totalSupply
+          ),
+        });
+      }
+      throw new ApiError(
+        httpStatus.NOT_FOUND,
+        `${req.params.tokenName} token configuration not found in config.ts`
+      );
+    }
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "Please Configure Tokens information in config.ts file"
     );
+  }
+);
 
-  let tokensSupplies = await Promise.all(requests);
-  let tokensSuppliesInBN = tokensSupplies.map((token) =>
-    Web3Helper.toBN(token)
-  );
-
-  let total = Web3.utils.toBN(0);
-  tokensSuppliesInBN.forEach((supplyBN) => {
-    total = total.add(supplyBN);
+const createSupplyByNetworksResponse = (
+  tokensSupplies: any,
+  totalSupply: string
+) => {
+  return tokensSupplies.map((supply: any) => {
+    let suplyOnNetwork = Web3.utils.fromWei(supply.supplyInBN, "ether");
+    let percentageOfTotalSupply =
+      (Number(suplyOnNetwork) / Number(totalSupply)) * 100;
+    return {
+      network: supply.token.networkName,
+      chainId: supply.token.chainId,
+      contractaddress: supply.token.contractaddress,
+      totalSupply: suplyOnNetwork,
+      percentageOfTotalSupply: percentageOfTotalSupply.toFixed(2),
+    };
   });
-  const result = Web3.utils.fromWei(total, "ether");
-  return res.json({ result });
 };
 
 export default {
