@@ -1,13 +1,12 @@
-import axios from 'axios'
+import axios from "axios";
 
-const supplyRequest = async(url: string, decimals:number): Promise<any> => {
-  const response =  await axios.get(url);
-  let supply = "0"  
-  if(response.status === 200) 
-    supply= response.data.result
-  return {tokens:supply, decimals}
-}
+const supplyRequest = async (token: any): Promise<any> => {
+  const response = await axios.get(token.getUrl());
+  let supply = "0";
+  if (response.status === 200) supply = response.data.result;
+  return { supply, token };
+};
 
 export default {
-    supplyRequest
-}
+  supplyRequest,
+};
