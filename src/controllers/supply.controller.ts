@@ -13,7 +13,10 @@ const getTokenSupply = catchAsync(
     let contractsInfo = config.CONTRACTS_INFO;
     if (contractsInfo.length > 0) {
       for (let i = 0; i < contractsInfo.length; i++) {
-        if (contractsInfo[i].tokenName === req.params.tokenName) {
+        if (
+          contractsInfo[i].tokenName.toLocaleLowerCase() ===
+          req.params.tokenName.toLocaleLowerCase()
+        ) {
           requests.push(axiosService.supplyRequest(contractsInfo[i]));
         }
       }

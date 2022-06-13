@@ -45,3 +45,7 @@ npm run build
 ```bash
 npm run start
 ```
+
+## Endpoints
+
+/v1/tokenSupply/{yourTokenName}/networks/all
