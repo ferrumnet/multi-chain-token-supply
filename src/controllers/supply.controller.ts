@@ -10,15 +10,16 @@ import httpStatus from "http-status";
 const getTokenSupply = catchAsync(
   async (req: Request, res: Response): Promise<any> => {
     let raw = req.query.raw ? req.query.raw === "true" : false;
+    let forNetwork = req.params.forNetwork.toLocaleLowerCase();
+    console.log({ forNetwork });
     let requests = [];
     let contractsInfo = config.CONTRACTS_INFO;
     if (contractsInfo.length > 0) {
       for (let i = 0; i < contractsInfo.length; i++) {
-        if (
-          contractsInfo[i].tokenName.toLocaleLowerCase() ===
-          req.params.tokenName.toLocaleLowerCase()
-        ) {
-          requests.push(axiosService.supplyRequest(contractsInfo[i]));
+        if (forNetwork === "all" || forNetwork === contractsInfo[i].networkName.toLocaleLowerCase()) {
+          if (contractsInfo[i].tokenName.toLocaleLowerCase() === req.params.tokenName.toLocaleLowerCase()) {
+            requests.push(axiosService.supplyRequest(contractsInfo[i]));
+          }
         }
       }
 
@@ -26,18 +27,14 @@ const getTokenSupply = catchAsync(
         let tokensSupplies = await Promise.all(requests);
 
         let tokensSuppliesInBN = tokensSupplies.map((supplyObject) => {
-          let supplyInBN = Web3Helper.toBN(
-            supplyObject.supply,
-            supplyObject.token.decimals
-          );
+          let supplyInBN = Web3Helper.toBN(supplyObject.supply, supplyObject.token.decimals);
           supplyObject.supplyInBN = supplyInBN;
           return supplyObject;
         });
 
         let totalSupply = Web3Helper.countTotalSupply(tokensSuppliesInBN);
 
-        return raw
-          ? res.send(totalSupply)
+        return raw ? res.send(totalSupply)
           : res.send({
               totalSupply,
               totalSupplyByNetworks: createSupplyByNetworksResponse(
