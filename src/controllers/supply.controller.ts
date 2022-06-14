@@ -9,6 +9,7 @@ import httpStatus from "http-status";
 
 const getTokenSupply = catchAsync(
   async (req: Request, res: Response): Promise<any> => {
+    let raw = req.query.raw ? req.query.raw === "true" : false;
     let requests = [];
     let contractsInfo = config.CONTRACTS_INFO;
     if (contractsInfo.length > 0) {
@@ -35,13 +36,15 @@ const getTokenSupply = catchAsync(
 
         let totalSupply = Web3Helper.countTotalSupply(tokensSuppliesInBN);
 
-        return res.send({
-          totalSupply,
-          totalSupplyByNetworks: createSupplyByNetworksResponse(
-            tokensSuppliesInBN,
-            totalSupply
-          ),
-        });
+        return raw
+          ? res.send(totalSupply)
+          : res.send({
+              totalSupply,
+              totalSupplyByNetworks: createSupplyByNetworksResponse(
+                tokensSuppliesInBN,
+                totalSupply
+              ),
+            });
       }
       throw new ApiError(
         httpStatus.NOT_FOUND,
