@@ -16,14 +16,15 @@ const getTokenSupply = catchAsync(
     if (contractsInfo.length > 0) {
       for (let i = 0; i < contractsInfo.length; i++) { 
         if (forNetwork !== "all" && raw) {
-          if(forNetwork === contractsInfo[i].networkName.toLocaleLowerCase() && contractsInfo[i].tokenName.toLocaleLowerCase() === req.params.tokenName.toLocaleLowerCase()){
-            requests.push(axiosService.supplyRequest(contractsInfo[i]));
+          if(forNetwork === contractsInfo[i].networkName.toLocaleLowerCase() || forNetwork === contractsInfo[i].networkFullName.toLocaleLowerCase() ||  parseInt(forNetwork) === contractsInfo[i].chainId){
+            if(contractsInfo[i].tokenName.toLocaleLowerCase() === req.params.tokenName.toLocaleLowerCase()){
+              requests.push(axiosService.supplyRequest(contractsInfo[i]));
+            }
           }
         }else if (contractsInfo[i].tokenName.toLocaleLowerCase() === req.params.tokenName.toLocaleLowerCase()) {
             requests.push(axiosService.supplyRequest(contractsInfo[i]));
           }              
       }
-
 
       if (requests.length > 0) {
         let tokensSupplies = await Promise.all(requests);
@@ -56,7 +57,12 @@ const getTokenSupply = catchAsync(
 const createSupplyByNetworksResponse = (tokensSupplies: any, totalSupply: string, forNetwork: string) => {
   let results:any = [];
    tokensSupplies.forEach((supply: any) => {
-    if (forNetwork === "all" || forNetwork === supply.token.networkName.toLocaleLowerCase()) {    
+    if (
+      forNetwork === "all" 
+    || forNetwork === supply.token.networkName.toLocaleLowerCase() 
+    || forNetwork === supply.token.networkFullName.toLocaleLowerCase() 
+    || parseInt(forNetwork) === supply.token.chainId
+    ) { 
       let suplyOnNetwork = Web3.utils.fromWei(supply.supplyInBN, "ether");
       let percentageOfTotalSupply = (Number(suplyOnNetwork) / Number(totalSupply)) * 100;
       results.push({

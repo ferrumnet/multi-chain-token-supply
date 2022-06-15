@@ -5,6 +5,7 @@ const PORT = 8080;
 const CONTRACTS_INFO: IContractsInfo[] = [
   {
     networkName: "BSC",
+    networkFullName: "BinanceSmartChain",
     decimals: 18,
     chainId: 56,
     tokenName: "FRM",
@@ -16,6 +17,7 @@ const CONTRACTS_INFO: IContractsInfo[] = [
   },
   {
     networkName: "BSC",
+    networkFullName: "BinanceSmartChain",
     decimals: 18,
     chainId: 56,
     tokenName: "FRMX",
@@ -26,7 +28,8 @@ const CONTRACTS_INFO: IContractsInfo[] = [
     },
   }, //etherscan
   {
-    networkName: "Ethereum",
+    networkName: "ETH",
+    networkFullName: "Ethereum",
     decimals: 18,
     chainId: 1,
     tokenName: "FRMX",
@@ -37,7 +40,8 @@ const CONTRACTS_INFO: IContractsInfo[] = [
     },
   },
   {
-    networkName: "Ethereum",
+    networkName: "ETH",
+    networkFullName: "Ethereum",
     decimals: 6,
     chainId: 1,
     tokenName: "FRM",
@@ -49,7 +53,8 @@ const CONTRACTS_INFO: IContractsInfo[] = [
   },
   //polygonscan
   {
-    networkName: "Polygon",
+    networkName: "MATIC",
+    networkFullName: "Polygon",
     decimals: 18,
     chainId: 137,
     tokenName: "FRM",
@@ -60,7 +65,8 @@ const CONTRACTS_INFO: IContractsInfo[] = [
     },
   },
   {
-    networkName: "Polygon",
+    networkName: "MATIC",
+    networkFullName: "Polygon",
     decimals: 18,
     chainId: 137,
     tokenName: "FRMX",
@@ -72,7 +78,8 @@ const CONTRACTS_INFO: IContractsInfo[] = [
   },
   //avalanche
   {
-    networkName: "Avalanche",
+    networkName: "AVAX",
+    networkFullName: "Avalanche",
     decimals: 18,
     chainId: 43114,
     tokenName: "FRM",
