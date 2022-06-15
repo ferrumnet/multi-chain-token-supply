@@ -67,21 +67,12 @@ jobs:
         aws-region: us-east-2
 
 
-    - name: CodeDeploy Deployment  Api
-      id: deploy_api
+    - name: CodeDeploy Deployment
+      id: deploy
       run: |
         aws deploy create-deployment \
           --application-name ${{ secrets.CODE_DEPLOY_APP }}  \
-          --deployment-group-name ${{ secrets.DEPLOYMENT_GROUP_API }}  \
-          --deployment-config-name CodeDeployDefault.OneAtATime \
-          --s3-location bucket=${{ env.s3-bucket }},key=${{ env.s3-filename }}.zip,bundleType=zip
-          # --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
-    - name: CodeDeploy Deployment Cron
-      id: deploy_cron
-      run: |
-        aws deploy create-deployment \
-          --application-name ${{ secrets.CODE_DEPLOY_APP }} \
-          --deployment-group-name ${{ secrets.DEPLOYMENT_GROUP_CRON }}  \
+          --deployment-group-name ${{ secrets.DEPLOYMENT_GROUP }}  \
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --s3-location bucket=${{ env.s3-bucket }},key=${{ env.s3-filename }}.zip,bundleType=zip
           # --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
