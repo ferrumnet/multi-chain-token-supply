@@ -1,5 +1,6 @@
 interface IContractsInfo {
   networkName: string;
+  networkFullName: string;
   decimals: number;
   chainId: number;
   tokenName: string;
