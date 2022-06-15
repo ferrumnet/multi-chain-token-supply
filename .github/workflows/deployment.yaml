@@ -1,0 +1,78 @@
+name: Build, Upload and Deploy
+
+on:
+    push:
+        branches:
+            - develop
+    pull_request:
+
+env:
+  AppName: chain-circulating-supply-backend
+  Region: us-east-2
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    env:
+      s3-bucket: chain-circulating-supply-pipeline-artifacts-dev
+      s3-filename: dev-aws-codedeploy-chain-${{ github.sha }}
+      Environment: dev
+      AppName: chain-circulating-supply-backend
+
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      run: |
+        docker build -t ${{ secrets.ECR_REGISTRY }}:latest .
+        docker push ${{ secrets.ECR_REGISTRY }}:latest
+    - name: AWS Deploy push
+      run: |
+        echo "export Region=${{ env.Region }}"  >> set_env.sh
+        echo "export Environment=${{ env.Environment }}"  >> set_env.sh
+        echo "export AppName=${{ env.AppName }}"  >> set_env.sh
+        echo "export ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}"  >> set_env.sh
+        aws deploy push \
+          --application-name gateway-backend-dev \
+          --s3-location s3://${{ env.s3-bucket }}/${{ env.s3-filename }}.zip \
+          --source .
+          # --description "This is a revision for the ${{ matrix.appname }}-${{ github.sha }}" \
+          # --ignore-hidden-files \
+  Deploy:
+    needs: [Build]
+    runs-on: ubuntu-latest
+    env:
+      s3-bucket: chain-circulating-supply-pipeline-artifacts-dev
+      s3-filename: dev-aws-codedeploy-chain-${{ github.sha }}
+      Environment: dev
+      AppName: chain-circulating-supply-backend
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+
+    - name: CodeDeploy Deployment
+      id: deploy
+      run: |
+        aws deploy create-deployment \
+          --application-name ${{ secrets.CODE_DEPLOY_APP }}  \
+          --deployment-group-name ${{ secrets.DEPLOYMENT_GROUP }}  \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --s3-location bucket=${{ env.s3-bucket }},key=${{ env.s3-filename }}.zip,bundleType=zip
+          # --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
