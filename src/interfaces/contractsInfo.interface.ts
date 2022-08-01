@@ -6,7 +6,9 @@ interface IContractsInfo {
   tokenName: string;
   contractaddress: string;
   apikey: string;
+  nonCirculatingAddresses: string[];
   getUrl: () => string;
+  getWalletTokenBalanceUrl?: (walletAddress: string) => string;
 }
 
 export default IContractsInfo;

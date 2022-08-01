@@ -5,7 +5,7 @@ const router = express.Router();
 
 const defaultRoutes = [
   {
-    path: "/tokenSupply",
+    path: "/:requestType",
     route: supplyRoute,
   },
 ];
