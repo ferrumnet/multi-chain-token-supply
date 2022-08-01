@@ -44,6 +44,7 @@ jobs:
         echo "export Environment=${{ env.Environment }}"  >> set_env.sh
         echo "export AppName=${{ env.AppName }}"  >> set_env.sh
         echo "export ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}"  >> set_env.sh
+        echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
         aws deploy push \
           --application-name gateway-backend-dev \
           --s3-location s3://${{ env.s3-bucket }}/${{ env.s3-filename }}.zip \
