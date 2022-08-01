@@ -6,13 +6,15 @@ import httpStatus from "http-status";
 import { TokenSupply } from "../models/tokenSupply.model";
 
 const getTotalTokenSupply = catchAsync(async (req: Request, res: Response): Promise<any> => {
+  let requestType = req.baseUrl.split("/")[2];
+
   let raw = req.query.raw ? req.query.raw === "true" : false;
   let forNetwork = req.params.forNetwork.toLocaleLowerCase();
   let tokenName = req.params.tokenName.toLocaleLowerCase();
   let totalSupply = await TokenSupply.findOne({ tokenName });
 
   if (totalSupply) {
-    let supplyResponse = prepareSupplyResponse(totalSupply, forNetwork, raw, req.params.requestType);
+    let supplyResponse = prepareSupplyResponse(totalSupply, forNetwork, raw, requestType);
 
     if (supplyResponse) {
       return res.send(supplyResponse);

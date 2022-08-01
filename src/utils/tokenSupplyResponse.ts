@@ -6,13 +6,13 @@ const filterByNetwork = (supplyOnNetworks: any, forNetwork: any) => {
 const prespareResponseByTypeRaw = (totalSupply: any, totalSupplyByNetworks: any, responseType: string, forNetwork: string) => {
   let response: any = {};
   switch (responseType) {
-    case "circulatingSupply":
+    case "tokenCirculatingSupply":
       response = forNetwork === "all" ? totalSupply.totalCirculatingSupply : totalSupplyByNetworks[0].totalCirculatingSupply;
       break;
-    case "nonCirculatingSupply":
+    case "tokenNonCirculatingSupply":
       response = forNetwork === "all" ? totalSupply.totalNonCirculatingSupply : totalSupplyByNetworks[0].totalNonCirculatingSupply;
       break;
-    case "totalSupply":
+    case "tokenTotalSupply":
       response = forNetwork === "all" ? totalSupply.totalSupply : totalSupplyByNetworks[0].totalSupply;
       break;
     default:
@@ -23,16 +23,16 @@ const prespareResponseByTypeRaw = (totalSupply: any, totalSupplyByNetworks: any,
 const prespareResponseByType = (totalSupply: any, totalSupplyByNetworks: any, responseType: string) => {
   let responseObject: any = {};
   switch (responseType) {
-    case "circulatingSupply":
+    case "tokenCirculatingSupply":
       responseObject.totalCirculatingSupply = totalSupply.totalCirculatingSupply;
       responseObject.totalSupplyByNetworks = totalSupplyByNetworks.map((supply: any) => pick(supply, ["networkName", "chainId", "contractaddress", "totalCirculatingSupply"]));
       break;
-    case "nonCirculatingSupply":
+    case "tokenNonCirculatingSupply":
       responseObject.totalNonCirculatingSupply = totalSupply.totalNonCirculatingSupply;
       responseObject.totalSupplyByNetworks = totalSupplyByNetworks.map((supply: any) => pick(supply, ["networkName", "chainId", "contractaddress", "totalNonCirculatingSupply"]));
 
       break;
-    case "totalSupply":
+    case "tokenTotalSupply":
       responseObject.totalSupply = totalSupply.totalSupply;
       responseObject.totalSupplyByNetworks = totalSupplyByNetworks.map((supply: any) => pick(supply, ["networkName", "chainId", "contractaddress", "totalSupply", "percentageOfTotalSupply"]));
       break;

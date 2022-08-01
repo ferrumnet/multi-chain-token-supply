@@ -1,27 +1,12 @@
 import express from "express";
 import supplyRoute from "./supply.route";
-import totalSupplyRoute from "./totalSupply.route";
-import nonCirculatingSupply from "./nonCirculatingSupply.route";
-import circulatingSupply from "./circulatingSupply.route";
 
 const router = express.Router();
 
 const defaultRoutes = [
   {
-    path: "/tokenSupply",
+    path: "/:requestType",
     route: supplyRoute,
-  },
-  {
-    path: "/tokenTotalSupply",
-    route: totalSupplyRoute,
-  },
-  {
-    path: "/tokenNonCirculatingSupply",
-    route: nonCirculatingSupply,
-  },
-  {
-    path: "/tokenCirculatingSupply",
-    route: circulatingSupply,
   },
 ];
 
