@@ -36,6 +36,7 @@ jobs:
 
     - name: Build, tag, and push image to Amazon ECR
       run: |
+        echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
         docker build -t ${{ secrets.ECR_REGISTRY }}:latest .
         docker push ${{ secrets.ECR_REGISTRY }}:latest
     - name: AWS Deploy push
@@ -44,7 +45,6 @@ jobs:
         echo "export Environment=${{ env.Environment }}"  >> set_env.sh
         echo "export AppName=${{ env.AppName }}"  >> set_env.sh
         echo "export ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}"  >> set_env.sh
-        echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
         aws deploy push \
           --application-name gateway-backend-dev \
           --s3-location s3://${{ env.s3-bucket }}/${{ env.s3-filename }}.zip \
