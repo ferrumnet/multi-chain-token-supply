@@ -23,6 +23,10 @@ Install the dependencies:
 npm install
 ```
 
+## Database configuration
+
+Create .env file from .env.example
+
 ## Note: configuration TokenContractAddresses and Networks
 
 open config.ts and add your TokenContractAddresses in CONTRACTS_INFO
