@@ -5,13 +5,14 @@ import { updateTokenSupply } from "../../services/tokenSupply.service";
 
 async function fetchTokenSupplies(): Promise<void> {
   try {
+    await runJob();
     let isLock: boolean = false;
-    schedule("*/5 * * * * *", async (): Promise<void> => {
+    schedule("*/59 * * * *", async (): Promise<void> => {
       if (!isLock) {
         isLock = true;
         console.log("cron is runing ");
         await runJob();
-        // isLock = false;
+        isLock = false;
       }
     });
   } catch (error) {
@@ -21,16 +22,13 @@ async function fetchTokenSupplies(): Promise<void> {
 
 async function runJob(): Promise<void> {
   let tokens = getTokens();
-  // tokens.for(async (token: string) => {
   for (const token of tokens) {
     let tokenContracts = config.CONTRACTS_INFO.filter((contract) => contract.tokenName === token);
     let tokenSupply = await getTotalTokenSupply(tokenContracts, token);
     let nonCirculatingSupply = await calTokenNonCirculatingSuply(tokenContracts);
     let supply = getTokenSuppliesOnNetworks(tokenSupply, nonCirculatingSupply, token);
     await updateTokenSupply(supply);
-    // console.log(supply);
     console.log(`${supply.tokenName} is updated on database`);
-    // });
   }
 }
 
