@@ -7,7 +7,7 @@ async function fetchTokenSupplies(): Promise<void> {
   try {
     await runJob();
     let isLock: boolean = false;
-    schedule("*/59 * * * *", async (): Promise<void> => {
+    schedule("*/30 * * * *", async (): Promise<void> => {
       if (!isLock) {
         isLock = true;
         console.log("cron is runing ");
@@ -23,12 +23,16 @@ async function fetchTokenSupplies(): Promise<void> {
 async function runJob(): Promise<void> {
   let tokens = getTokens();
   for (const token of tokens) {
-    let tokenContracts = config.CONTRACTS_INFO.filter((contract) => contract.tokenName === token);
-    let tokenSupply = await getTotalTokenSupply(tokenContracts, token);
-    let nonCirculatingSupply = await calTokenNonCirculatingSuply(tokenContracts);
-    let supply = getTokenSuppliesOnNetworks(tokenSupply, nonCirculatingSupply, token);
-    await updateTokenSupply(supply);
-    console.log(`${supply.tokenName} is updated on database`);
+    try {
+      let tokenContracts = config.CONTRACTS_INFO.filter((contract) => contract.tokenName === token);
+      let tokenSupply = await getTotalTokenSupply(tokenContracts, token);
+      let nonCirculatingSupply = await calTokenNonCirculatingSuply(tokenContracts);
+      let supply = getTokenSuppliesOnNetworks(tokenSupply, nonCirculatingSupply, token);
+      await updateTokenSupply(supply);
+      console.log(`${supply.tokenName} is updated on database`);
+    } catch (error) {
+      console.log({ error });
+    }
   }
 }
 
